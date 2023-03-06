@@ -1,0 +1,3 @@
+Run timings based on number of cores and residues
+cores   residues    Time_(min)
+12      1133        32
