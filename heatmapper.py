@@ -2,11 +2,7 @@ import MDAnalysis as mda
 from MDAnalysis import analysis
 from MDAnalysis.analysis import contacts
 from MDAnalysis.analysis.contacts import contact_matrix
-<<<<<<< HEAD
 # import mdtraj as md
-=======
-import mdtraj as md
->>>>>>> 9f0ceef655869f3c70296c411d1c570291febc61
 import pandas as pd
 import numpy as np
 import multiprocessing
@@ -17,11 +13,8 @@ import random
 import seaborn as sns
 import nglview as nv
 import time
-<<<<<<< HEAD
 from datetime import datetime
 from datetime import timedelta
-=======
->>>>>>> 9f0ceef655869f3c70296c411d1c570291febc61
 # from numba import jit, cuda
 # from timeit import default_timer as timer  
 
@@ -62,11 +55,7 @@ def help(func=''):
 class traj_analysis:
     def __new__(cls, *args, **kwargs):
         return super().__new__(cls)
-<<<<<<< HEAD
     def __init__(self,pdb_filename,xtc_filename,analyte='protein',probe='protein'):
-=======
-    def __init__(self,pdb_filename,xtc_filename,analyte='protein'):
->>>>>>> 9f0ceef655869f3c70296c411d1c570291febc61
         self.pdb_filename = pdb_filename
         self.xtc_filename = xtc_filename
         print('Loading in mda universe...')
@@ -74,28 +63,18 @@ class traj_analysis:
         print('Done.')
         # self.mdtraj_universe = md.load(pdb_filename,xtc_filename)
         # self.mda_universe_coords = mda.Universe(pdb_filename)
-<<<<<<< HEAD
         self.analyte_sel = analyte
         self.probe_sel = probe
         self.analyte_loaded = self.mda_universe.select_atoms(analyte)
         self.analyte_segids = np.unique(self.analyte_loaded.residues.segids)
-=======
-        self.analyte_loaded = self.mda_universe.select_atoms(analyte)
->>>>>>> 9f0ceef655869f3c70296c411d1c570291febc61
         self.analyte_resids = np.unique(self.analyte_loaded.residues.resids)
         self.n_jobs = cpu_count() # <--- CPUs available for multithreading
         self.n_frames_tot = self.mda_universe.trajectory.trajectory.n_frames # <--- Find total number of frames in the trajectory
         self.run_pass = 1
         rnd_qt = random.randint(0,int(len(quotes)-1))
-<<<<<<< HEAD
         # print('\n'+str(quotes[rnd_qt])+'\n')
         print(str(len(np.unique(self.analyte_loaded.segids)))+' segids loaded.')
         print(str(len(self.analyte_resids))+' resids per segid loaded.')
-=======
-        print(str(quotes[rnd_qt])+'\n')
-        print(str(len(np.unique(self.analyte_loaded.segids)))+' segids loaded.')
-        print(str(len(self.analyte_resids))+' resids per segid loaded.\n')
->>>>>>> 9f0ceef655869f3c70296c411d1c570291febc61
         print("\n- Run the heatmapper.help() function if you're lost")
     def frame_to_time(self,frame_in):
         self.time = frame_in*self.mda_universe.trajectory.dt
@@ -104,7 +83,6 @@ class traj_analysis:
         self.frame = time_in/self.mda_universe.trajectory.dt
         return self.frame
     def pre_cont_pro(self,start,stop,skip):
-<<<<<<< HEAD
         print('Frames: '+str(int(len(self.mda_universe.trajectory[start:stop:skip]))))
         print('Cores: '+str(int(self.n_jobs)))
         print('Passes: '+str(int(len(self.mda_universe.trajectory[start:stop:skip])/self.n_jobs)))
@@ -113,15 +91,6 @@ class traj_analysis:
     def cont_per_frame(self,frame_index,cont_dist,carbon,segid='A'): # <--- The actual function which is executed on each CPU
         # print('Reached frame '+str(frame_index)+'           ',end='\r')
         print(str(frame_index),end='\r')
-=======
-        frame_values = np.arange(self.mda_universe.trajectory.n_frames) # <--- Get all frames
-        print('Frames: '+str(int(len(frame_values[start:stop:skip]))))
-        print('Cores: '+str(int(self.n_jobs)))
-        print('Passes: '+str(int(len(frame_values[start:stop:skip])/self.n_jobs)))
-    def cont_per_frame(self,frame_index,cont_dist,segid,analyte,probe_sel,carbon): # <--- The actual function which is executed on each CPU
-        start_time = time.time()
-        print('Reached frame '+str(frame_index)+'           ',end='\r')
->>>>>>> 9f0ceef655869f3c70296c411d1c570291febc61
         self.mda_universe.trajectory[frame_index] # <--- Select the frame for analysis
         residue_contacts=[] # <--- Create an empty array to store the contacts per residue in
         for resid_iter in self.analyte_resids: # <--- Iterate throught resids
@@ -134,7 +103,6 @@ class traj_analysis:
             distances = mda.analysis.distances.distance_array(group_A.positions, group_B.positions) # <--- Get distances
             contact_count = np.count_nonzero(distances <= cont_dist) # <--- Count the number of distances under the cutoff
             residue_contacts.append(contact_count) # <--- Add the number of contacts for that residus
-<<<<<<< HEAD
         print('b')
         df_out = pd.read_csv('contact_analysis_data_'+str(segid)+'.csv')
         df_out[str(frame_index)] = residue_contacts
@@ -149,32 +117,6 @@ class traj_analysis:
         for segid in self.analyte_segids: # <--- Iterate through chains
             df_out = pd.DataFrame({'Resid':self.analyte_resids})
             df_out.to_csv('contact_analysis_data_'+str(segid)+'.csv',index=False)
-=======
-        self.cont_frames_done.append(frame_index)
-        self.cont_pro_run_times.append(time.time() - start_time)
-        return residue_contacts
-    def cont_pro(self,cont_dist=3.3,analyte='protein',probe_sel='protein',carbon=True,start=0,stop=-1,skip=1):
-        self.cont_pro_run_times = []
-        self.cont_frames_done = []
-        self.raw_cont_data = [] # <--- Create empty array for the chain data
-        segid_iter = 0
-        segid_iter = 0
-        self.contact_dfs = []
-        segids_in_pro = self.mda_universe.select_atoms(analyte).segids
-        print('Selected analyte')
-        self.pro_segid = []
-        for segid in segids_in_pro:
-            if segid not in self.pro_segid:
-                self.pro_segid.append(segid) # <--- Get a list of segids in the protein
-        print('Got segids. ',str(len(self.pro_segid)),' segids to analyse.')
-        resids_in_pro = self.mda_universe.select_atoms(analyte).resids
-        self.pro_resid = []
-        for resid in self.analyte_resids:
-            if resid not in self.pro_resid:
-                self.pro_resid.append(resid) # <--- Get a list of resids in the protein
-        print('Got resids. ',str(len(self.pro_resid)),' resids to analyse.')
-        for segid in self.pro_segid: # <--- Iterate through chains
->>>>>>> 9f0ceef655869f3c70296c411d1c570291febc61
             print('Chain: '+str(segid),end='\n') # <--- Update console
             run_per_frame = partial(self.cont_per_frame, cont_dist=cont_dist,carbon=carbon,segid=segid) # <--- Set the per frame function
             frame_values = np.arange(self.mda_universe.trajectory.n_frames) # <--- Get all frames
@@ -185,32 +127,12 @@ class traj_analysis:
             print('Running analysis - Start time: ',str(self.start_time))
             print('Working on frame...')
             with Pool(self.n_jobs) as worker_pool: # <--- Create a pool of CPUs to use
-<<<<<<< HEAD
                 worker_pool.map(run_per_frame, self.analysis_frame_values) # <--- Run the per frame function on a select CPU
             stop_time = str(datetime.now().strftime("%H:%M:%S"))
             print('Analysis done - Stop time: ',stop_time)
             segid_iter+=1
             print('\n')
     def gen_map(self,df_data,res_op=1,res_rep='spacefill',res_rad=0,BB_only=True):
-=======
-                print('Running analysis')
-                result = worker_pool.map(run_per_frame, frame_values) # <--- Run the per frame function on a select CPU
-                print('Analysis done')
-            self.raw_cont_data.append(np.asarray(result).T) # <--- Transpose the results into a single array
-            df = pd.DataFrame({'resids':self.pro_resid})
-            time_data_dfs = []
-            for iteration in range(len(self.raw_cont_data[0][0])):
-                time_data = []
-                for resid_iter in range(len(self.raw_cont_data[0])):
-                    time_data.append(self.raw_cont_data[segid_iter][resid_iter][iteration])
-                time_data_dfs.append(pd.DataFrame({'frame_'+str(frame_values[iteration]):time_data}))
-            df_concat = pd.concat([df, *time_data_dfs], axis=1)
-            self.contact_dfs.append(df_concat)
-            segid_iter+=1
-        # self.gen_map(self.contact_dfs,analyte)
-        return self.contact_dfs
-    def gen_map(self,df_data,analyte,res_op=1,res_rep='spacefill',res_rad=0.5,BB_only=True):
->>>>>>> 9f0ceef655869f3c70296c411d1c570291febc61
         # Standardise df so that the resids are the index.
         print('Standardising input')
         if 'resids' in df_data.columns.values:
@@ -226,7 +148,6 @@ class traj_analysis:
         conts_per_resid_minus_min = conts_per_resid-self.min_conts # <--- Scale starts at 0
         conts_per_resid_std = ((conts_per_resid_minus_min/max(conts_per_resid_minus_min))*100).astype(int) # <--- 100 colour values
         sequential_colors = sns.color_palette("flare", 101).as_hex()
-<<<<<<< HEAD
         act = self.mda_universe.select_atoms(self.analyte_sel)
         self.heatmap = nv.show_mdanalysis(act,default_representation=True)
         self.heatmap.add_representation('trace', selection='all', color='grey', opacity=1)
@@ -250,21 +171,6 @@ class traj_analysis:
                     self.heatmap.add_representation(res_rep,selection=str(resid),color=sequential_colors[conts_per_resid_std[resid_iter]],opacity=res_op,radius=res_rad)
                     resid_iter+=1
         self.heatmap._view_height = '400px'
-=======
-        act = self.mda_universe.select_atoms(analyte)
-        self.heatmap = nv.show_mdanalysis(act,default_representation=False)
-        self.heatmap.add_representation('cartoon', selection='all', color='grey', opacity=1)
-        resid_iter = 0
-        if BB_only == True:
-            for resid in self.analyte_resids:
-                self.heatmap.add_representation(res_rep,selection='backbone and '+str(resid),color=sequential_colors[conts_per_resid_std[resid_iter]],opacity=res_op,radius=res_rad)
-                resid_iter+=1
-        else:
-            for resid in self.analyte_resids:
-                self.heatmap.add_representation(res_rep,selection=str(resid),color=sequential_colors[conts_per_resid_std[resid_iter]],opacity=res_op,radius=res_rad)
-                resid_iter+=1
-        self.heatmap._view_height = '800px'
->>>>>>> 9f0ceef655869f3c70296c411d1c570291febc61
         print('Done. Run \nobj.heatmap \nin jupyter to view. Run \nnv.write_html("index.html",[obj.heatmap]) \nTo save as an html you can open later.')
         return self.heatmap
     def AA_cont_freq(self,df_data,segid_identifier='protein'):
@@ -327,7 +233,6 @@ class traj_analysis:
             resid_tot_conts[resid_iter] = df_data.query('index == @resid').values.sum()
             resid_iter += 1
         self.cont_per_res = pd.DataFrame({'resids':df_data.resids.values,'contacts':resid_tot_conts})
-<<<<<<< HEAD
         return self.cont_per_res
     def display(self,selection='protein',spec_sel='all',res_op=1,res_rep='spacefill',res_rad=0,def_rep=True):
         act = self.mda_universe.select_atoms(str(selection))
@@ -339,6 +244,3 @@ class traj_analysis:
         self.show_display._view_height = '800px'
         self.show_display.center()
         return self.show_display
-=======
-        return self.cont_per_res
->>>>>>> 9f0ceef655869f3c70296c411d1c570291febc61
