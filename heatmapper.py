@@ -41,8 +41,11 @@ class traj_analysis:
         '''
         A function to load in an MDA universe if one isn't already loaded.
         '''
-        if 'self.mda_universe' not in locals():
-            self.mda_universe = mda.Universe(self.pdb_path,self.xtc_path) # <--- Load in universe if it doesn't exist
+        try:
+            print(self.mda_universe)
+            print('...universe already loaded...')
+        except:
+            self.mda_universe = mda.Universe(self.pdb_path,self.xtc_path)
     
     def frame_to_time(self,frame_in):
         '''
@@ -79,7 +82,10 @@ class traj_analysis:
         A function to provide information about the analyte such as protein residue, atoms, etc.
         '''
         self.def_load_in_uni()
-        if 'analyte_loaded' not in locals():
+        try:
+            print(self.analyte_loaded)
+            print('...analyte already selected...')
+        except:
             self.analyte_loaded = self.mda_universe.select_atoms(self.analyte_sel)
         self.analyte_segids = np.unique(self.analyte_loaded.residues.segids)
         self.analyte_resids = np.unique(self.analyte_loaded.residues.resids)
