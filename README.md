@@ -9,5 +9,6 @@ To-do list:
 2) Test files and folder - short trajectory with 
 3) Incorporate RMSD + hydrogen-bonding into heatmapping
 4) Add in appendices for the package installation
-5) Write to-do list
+5) Write to-do list for new features (if necessary)
 6) Write jupyter notebook with instructions and notes for new users
+7) Change nglview integration to Py3Dmol (https://pypi.org/project/py3Dmol/) for jupyter-notebook integration. iPymol (https://pypi.org/project/ipymol/) might also work.
