@@ -9,4 +9,3 @@ To-do list:
 4) Add in appendices for the package installation
 5) Write to-do list
 6) Write jupyter notebook with instructions and notes for new users
-7) 
