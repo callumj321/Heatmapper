@@ -12,6 +12,7 @@ To-do list:
 5) Write to-do list for new features (if necessary)
 6) Write jupyter notebook with instructions and notes for new users
 7) Change nglview integration to Py3Dmol (https://pypi.org/project/py3Dmol/) for jupyter-notebook integration. iPymol (https://pypi.org/project/ipymol/) might also work.
+8) Get the code to work for residues, atoms, indices.
 
 From meeting 10/10/2023:
 1) Eddie and Chris to go through the heatmapper.py code and highlight anything that is not straight forward (CODE REVIEW).
