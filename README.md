@@ -16,3 +16,4 @@ To-do list:
 From meeting 10/10/2023:
 1) Eddie and Chris to go through the heatmapper.py code and highlight anything that is not straight forward (CODE REVIEW).
 2) Eddie to integrate the RMSD and hydrogen-bonding into heatmapping - need to review how to fit in the code with the new changes to how the colouring/analysis is done, might not work the same with the functions.
+3) Callum to review/update doc strings and write high-level/broad text (few sentences) in the README to discuss what the code does.
