@@ -1,6 +1,8 @@
 # Heatmapper
 A python module for calculating the contacts to a molecule and then generating an interactive heatmap.
 
+The MDAKits website: https://www.mdanalysis.org/pages/mdakits/
+
 To-do list:
 
 1) Continuous Integration/ Github-hosted runners
