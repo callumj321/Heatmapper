@@ -98,8 +98,6 @@ class traj_analysis:
         carbon (boolean)    : Whether to include carbons or not. This decreases accuracy but can save on time.
         segid (str)         : The segid of the protein to calculate for.
         '''
-        # print('Reached frame '+str(frame_index)+'           ',end='\r')
-        print(str(frame_index),end='\r')
         self.mda_universe.trajectory[frame_index] # <--- Select the frame for analysis
         residue_contacts=[] # <--- Create an empty array to store the contacts per residue in
         for resid_iter in self.analyte_resids: # <--- Iterate throught resids
@@ -112,11 +110,8 @@ class traj_analysis:
             distances = mda.analysis.distances.distance_array(group_A.positions, group_B.positions) # <--- Get distances
             contact_count = np.count_nonzero(distances <= cont_dist) # <--- Count the number of distances under the cutoff
             residue_contacts.append(contact_count) # <--- Add the number of contacts for that residus
-        print('b')
-        df_out = pd.read_csv('tmp\\contact_analysis_data_'+str(segid)+'.csv')
-        df_out[str(frame_index)] = residue_contacts
-        df_out.to_csv('tmp\\contact_analysis_data_'+str(segid)+'.csv',index=False)
-        
+        return frame_index, residue_contacts
+
     def cont_pro(self,cont_dist=3.3,carbon=True,start=0,stop=-1,skip=1):
         '''
         A function to perform the main contact analysis. The "big papa" of the contained functions, if you will...
@@ -142,13 +137,12 @@ class traj_analysis:
             print(str(len(self.analysis_frame_values))+' frames to analyse on '+str(self.__n_jobs)+' cores.',end='\n') # <--- Update console
             print('First frame: '+str(self.analysis_frame_values[0])+' - Final frame: '+str(self.analysis_frame_values[-1]))
             print('Working on it...')
-            for value in self.analysis_frame_values:
-                self.cont_per_frame(value, cont_dist=cont_dist, carbon=carbon, segid=segid)
-            # with Pool(self.n_jobs) as worker_pool: # <--- Create a pool of CPUs to use
-            #     worker_pool.map(run_per_frame, self.analysis_frame_values) # <--- Run the per frame function on a select CPU
-            print('here')
+            with Pool(self.__n_jobs) as worker_pool: # <--- Create a pool of CPUs to use
+                out = worker_pool.map(run_per_frame, self.analysis_frame_values) # <--- Run the per frame function on a select CPU
+            for i in out:
+                df_out[str(i[0])] = i[1]
+            df_out.to_csv('tmp\\contact_analysis_data_'+str(segid)+'.csv',index=False)
             segid_iter+=1
-            print('\n')
 
     def gen_map(self,df_data,res_op=1,res_rep='spacefill',res_rad=0,BB_only=True):
         '''
