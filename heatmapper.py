@@ -84,14 +84,14 @@ class TrajAnalysis:
         '''
         self.__load_in_uni()
         if self.__analyte_loaded is not None:
-            print(self.analyte_loaded)
+            print(self.__analyte_loaded)
             print('...analyte already selected...')
         else:
-            self.analyte_loaded = self.__mda_universe.select_atoms(self.__analyte_sel)
-        self.analyte_segids = np.unique(self.analyte_loaded.residues.segids)
-        self.analyte_resids = np.unique(self.analyte_loaded.residues.resids)
+            self.__analyte_loaded = self.__mda_universe.select_atoms(self.__analyte_sel)
+        self.analyte_segids = np.unique(self.__analyte_loaded.residues.segids)
+        self.analyte_resids = np.unique(self.__analyte_loaded.residues.resids)
 
-    def __cont_per_frame(self,frame_index,cont_dist,carbon,segid='A'): # <--- The actual function which is executed on each CPU
+    def cont_per_frame(self,frame_index,cont_dist,carbon,segid='A'): # <--- The actual function which is executed on each CPU
         '''
         A function to perform contact analysis per frame to allow for multithreading.
         This function assumes to first chain only but the actual value is given from the contact function.
@@ -132,17 +132,18 @@ class TrajAnalysis:
             df_out = pd.DataFrame({'Resid':self.analyte_resids})
             df_out.to_csv('tmp\\contact_analysis_data_'+str(segid)+'.csv',index=False)
             print('Chain: '+str(segid),end='\n') # <--- Update console
-            run_per_frame = partial(self.__cont_per_frame, cont_dist=cont_dist,carbon=carbon,segid=segid) # <--- Set the per frame function
+            run_per_frame = partial(self.cont_per_frame, cont_dist=cont_dist,carbon=carbon,segid=segid) # <--- Set the per frame function
             print(self.__mda_universe.trajectory.n_frames)
             frame_values = np.arange(self.__mda_universe.trajectory.n_frames) # <--- Get all frames
             self.analysis_frame_values = frame_values[start:stop:skip] # <--- Select every nth frame for reducing run time
             print(str(len(self.analysis_frame_values))+' frames to analyse on '+str(self.__n_jobs)+' cores.',end='\n') # <--- Update console
             print('First frame: '+str(self.analysis_frame_values[0])+' - Final frame: '+str(self.analysis_frame_values[-1]))
             print('Working on it...')
+            print(self.analysis_frame_values)
             with Pool(self.__n_jobs) as worker_pool: # <--- Create a pool of CPUs to use
                 out = worker_pool.map(run_per_frame, self.analysis_frame_values) # <--- Run the per frame function on a select CPU
-            for i in out:
-                df_out[str(i[0])] = i[1]
+                for i in out:
+                    df_out[str(i[0])] = i[1]
             df_out.to_csv('tmp\\contact_analysis_data_'+str(segid)+'.csv',index=False)
             segid_iter+=1
 
