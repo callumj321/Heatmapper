@@ -15,7 +15,7 @@ import os
 # '"ff at 15" - Abraham Lincoln']
 
 # Define class
-class traj_analysis:
+class TrajAnalysis:
     def __init__(self,pdb_path,xtc_path,probe_sel='protein',analyte_sel='protein'):
         '''
         Initialiase the class.
