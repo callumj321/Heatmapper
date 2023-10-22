@@ -91,7 +91,7 @@ class TrajAnalysis:
         self.analyte_segids = np.unique(self.analyte_loaded.residues.segids)
         self.analyte_resids = np.unique(self.analyte_loaded.residues.resids)
 
-    def cont_per_frame(self,frame_index,cont_dist,carbon,segid='A'): # <--- The actual function which is executed on each CPU
+    def __cont_per_frame(self,frame_index,cont_dist,carbon,segid='A'): # <--- The actual function which is executed on each CPU
         '''
         A function to perform contact analysis per frame to allow for multithreading.
         This function assumes to first chain only but the actual value is given from the contact function.
@@ -132,7 +132,7 @@ class TrajAnalysis:
             df_out = pd.DataFrame({'Resid':self.analyte_resids})
             df_out.to_csv('tmp\\contact_analysis_data_'+str(segid)+'.csv',index=False)
             print('Chain: '+str(segid),end='\n') # <--- Update console
-            run_per_frame = partial(self.cont_per_frame, cont_dist=cont_dist,carbon=carbon,segid=segid) # <--- Set the per frame function
+            run_per_frame = partial(self.__cont_per_frame, cont_dist=cont_dist,carbon=carbon,segid=segid) # <--- Set the per frame function
             print(self.__mda_universe.trajectory.n_frames)
             frame_values = np.arange(self.__mda_universe.trajectory.n_frames) # <--- Get all frames
             self.analysis_frame_values = frame_values[start:stop:skip] # <--- Select every nth frame for reducing run time
