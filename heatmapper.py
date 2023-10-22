@@ -139,7 +139,6 @@ class TrajAnalysis:
             print(str(len(self.analysis_frame_values))+' frames to analyse on '+str(self.__n_jobs)+' cores.',end='\n') # <--- Update console
             print('First frame: '+str(self.analysis_frame_values[0])+' - Final frame: '+str(self.analysis_frame_values[-1]))
             print('Working on it...')
-            print(self.analysis_frame_values)
             with Pool(self.__n_jobs) as worker_pool: # <--- Create a pool of CPUs to use
                 out = worker_pool.map(run_per_frame, self.analysis_frame_values) # <--- Run the per frame function on a select CPU
                 for i in out:
