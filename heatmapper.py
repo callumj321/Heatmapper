@@ -1,5 +1,7 @@
 # Import
 import MDAnalysis as mda
+from MDAnalysis import analysis
+from MDAnalysis.analysis import contacts
 from multiprocessing import Pool
 from multiprocessing import cpu_count
 from functools import partial
