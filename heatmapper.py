@@ -34,16 +34,18 @@ class TrajAnalysis:
         self.__probe_sel = probe_sel
         self.__analyte_sel = analyte_sel
         self.__n_jobs = cpu_count() # <--- CPUs available for multithreading
+        self.__mda_universe = None
+        self.__analyte_loaded = None
 
     def __load_in_uni(self):
         '''
         A function to load in an MDA universe if one isn't already loaded.
         '''
-        try:
-            print(self.mda_universe)
+        if self.__mda_universe is not None:
+            print(self.__mda_universe)
             print('...universe already loaded...')
-        except:
-            self.mda_universe = mda.Universe(self.__pdb_path,self.__xtc_path)
+        else:
+            self.__mda_universe = mda.Universe(self.__pdb_path,self.__xtc_path)
             
     
     def __frame_to_time(self,frame_in):
@@ -51,7 +53,7 @@ class TrajAnalysis:
         A function convert a frame to time (ps) of simulation for providing input to contact analysis.
         '''
         self.__load_in_uni()
-        self.time = frame_in*self.mda_universe.trajectory.dt
+        self.time = frame_in*self.__mda_universe.trajectory.dt
         return self.time
     
     def __time_to_frame(self,time_in):
@@ -59,7 +61,7 @@ class TrajAnalysis:
         A function convert a time (ps) to frame of simulation for providing input to contact analysis.
         '''
         self.__load_in_uni()
-        self.frame = time_in/self.mda_universe.trajectory.dt
+        self.frame = time_in/self.__mda_universe.trajectory.dt
         return self.frame
     
     def __pre_cont_pro(self,start,stop,skip):
@@ -70,9 +72,9 @@ class TrajAnalysis:
         stop (int)  : The frame in simulation to stop analysis on.
         skip (int)  : The frames to skip between calculations. This can save run time.
         '''
-        print('Frames: '+str(int(len(self.mda_universe.trajectory[start:stop:skip]))))
+        print('Frames: '+str(int(len(self.__mda_universe.trajectory[start:stop:skip]))))
         print('Cores: '+str(int(self.__n_jobs)))
-        print('Passes: '+str(int(len(self.mda_universe.trajectory[start:stop:skip])/self.__n_jobs)))
+        print('Passes: '+str(int(len(self.__mda_universe.trajectory[start:stop:skip])/self.__n_jobs)))
         print('Chains: '+str(int(len(self.analyte_segids))))
         print('Residues per chain: '+str(int(self.analyte_resids)))
     
@@ -81,11 +83,11 @@ class TrajAnalysis:
         A function to provide information about the analyte such as protein residue, atoms, etc.
         '''
         self.__load_in_uni()
-        try:
+        if self.__analyte_loaded is not None:
             print(self.analyte_loaded)
             print('...analyte already selected...')
-        except:
-            self.analyte_loaded = self.mda_universe.select_atoms(self.__analyte_sel)
+        else:
+            self.analyte_loaded = self.__mda_universe.select_atoms(self.__analyte_sel)
         self.analyte_segids = np.unique(self.analyte_loaded.residues.segids)
         self.analyte_resids = np.unique(self.analyte_loaded.residues.resids)
 
@@ -98,15 +100,15 @@ class TrajAnalysis:
         carbon (boolean)    : Whether to include carbons or not. This decreases accuracy but can save on time.
         segid (str)         : The segid of the protein to calculate for.
         '''
-        self.mda_universe.trajectory[frame_index] # <--- Select the frame for analysis
+        self.__mda_universe.trajectory[frame_index] # <--- Select the frame for analysis
         residue_contacts=[] # <--- Create an empty array to store the contacts per residue in
         for resid_iter in self.analyte_resids: # <--- Iterate throught resids
             if carbon == True:
-                group_A = self.mda_universe.select_atoms('('+str(self.__analyte_sel)+') and (resid '+str(resid_iter)+')') # <--- Select the correct resid
-                group_B = self.mda_universe.select_atoms('(around '+str(2*cont_dist)+' resid '+str(resid_iter)+') and ('+str(self.__probe_sel)+')') # <--- Select the analyte around the resid
+                group_A = self.__mda_universe.select_atoms('('+str(self.__analyte_sel)+') and (resid '+str(resid_iter)+')') # <--- Select the correct resid
+                group_B = self.__mda_universe.select_atoms('(around '+str(2*cont_dist)+' resid '+str(resid_iter)+') and ('+str(self.__probe_sel)+')') # <--- Select the analyte around the resid
             elif carbon == False:
-                group_A = self.mda_universe.select_atoms('('+str(self.__analyte_sel)+') and (resid '+str(resid_iter)+') and (not name C)') # <--- Select the correct resid
-                group_B = self.mda_universe.select_atoms('(around '+str(2*cont_dist)+' resid '+str(resid_iter)+') and ('+str(self.__probe_sel)+') and (not name C)') # <--- Select the analyte around the resid
+                group_A = self.__mda_universe.select_atoms('('+str(self.__analyte_sel)+') and (resid '+str(resid_iter)+') and (not name C)') # <--- Select the correct resid
+                group_B = self.__mda_universe.select_atoms('(around '+str(2*cont_dist)+' resid '+str(resid_iter)+') and ('+str(self.__probe_sel)+') and (not name C)') # <--- Select the analyte around the resid
             distances = mda.analysis.distances.distance_array(group_A.positions, group_B.positions) # <--- Get distances
             contact_count = np.count_nonzero(distances <= cont_dist) # <--- Count the number of distances under the cutoff
             residue_contacts.append(contact_count) # <--- Add the number of contacts for that residus
@@ -131,8 +133,8 @@ class TrajAnalysis:
             df_out.to_csv('tmp\\contact_analysis_data_'+str(segid)+'.csv',index=False)
             print('Chain: '+str(segid),end='\n') # <--- Update console
             run_per_frame = partial(self.cont_per_frame, cont_dist=cont_dist,carbon=carbon,segid=segid) # <--- Set the per frame function
-            print(self.mda_universe.trajectory.n_frames)
-            frame_values = np.arange(self.mda_universe.trajectory.n_frames) # <--- Get all frames
+            print(self.__mda_universe.trajectory.n_frames)
+            frame_values = np.arange(self.__mda_universe.trajectory.n_frames) # <--- Get all frames
             self.analysis_frame_values = frame_values[start:stop:skip] # <--- Select every nth frame for reducing run time
             print(str(len(self.analysis_frame_values))+' frames to analyse on '+str(self.__n_jobs)+' cores.',end='\n') # <--- Update console
             print('First frame: '+str(self.analysis_frame_values[0])+' - Final frame: '+str(self.analysis_frame_values[-1]))
@@ -168,7 +170,7 @@ class TrajAnalysis:
         conts_per_resid_minus_min = conts_per_resid-self.min_conts # <--- Scale starts at 0
         conts_per_resid_std = ((conts_per_resid_minus_min/max(conts_per_resid_minus_min))*100).astype(int) # <--- 100 colour values
         sequential_colors = sns.color_palette("flare", 101).as_hex()
-        act = self.mda_universe.select_atoms(self.__analyte_sel)
+        act = self.__mda_universe.select_atoms(self.__analyte_sel)
         self.heatmap = nv.show_mdanalysis(act,default_representation=True)
         self.heatmap.add_representation('trace', selection='all', color='grey', opacity=1)
         resid_iter = 0
