@@ -19,3 +19,8 @@ From meeting 10/10/2023:
 2) Eddie to integrate the RMSD and hydrogen-bonding into heatmapping - need to review how to fit in the code with the new changes to how the colouring/analysis is done, might not work the same with the functions.
 3) Callum to review/update doc strings and write high-level/broad text (few sentences) in the README to discuss what the code does.
 4) Chris to look into the test files etc. and review if they need restructuring.
+
+From meeting 01/11/2023:
+1) Eddie and Callum to decide on what systems we should be producing to use as test cases. Melittin for dimerising, lipid contacts; ubiquitin for protein-protein(?) interactions [lots of binding domains] 
+2) Eddie to chase Micaela for a second meeting
+3) Chris to write up what he needs for testing
