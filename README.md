@@ -24,3 +24,4 @@ From meeting 01/11/2023:
 1) Eddie and Callum to decide on what systems we should be producing to use as test cases. Melittin for dimerising, lipid contacts; ubiquitin for protein-protein(?) interactions [lots of binding domains] 
 2) Eddie to chase Micaela for a second meeting
 3) Chris to write up what he needs for testing
+4) Survey users for requirements spec - document names: requirement specification, Moscow analysis (must have, could have, will not have)
